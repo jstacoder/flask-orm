@@ -1,15 +1,30 @@
-import sqlalchemy as sa
-from typing import Optional, ClassVar
-from sqlalchemy import orm
+from sqlalchemy import Column, Integer
+from typing import Optional, ClassVar, TypeVar, Generic
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 from .base_query import BaseQuery
 
 
-class BaseModel(object):
+class BaseModel:
+    query: BaseQuery = None
 
-    query_class = BaseQuery  # type: ClassVar[BaseQuery]
+    @declared_attr
+    def __tablename__(cls) -> str:
+        return cls.__name__
 
-    query = None            # type: ClassVar[Optional[BaseQuery]]
+    @declared_attr
+    def id(self) -> Column:
+        return Column(Integer, primary_key=True)
+
+    @classmethod
+    def all(cls) -> BaseQuery:
+        return cls.query.all()
+
+    def save(self, commit: bool=True) -> None:
+        self.query.session.add(self)
+        if commit:
+            self.query.session.commit()
 
 
+
+Model = declarative_base(cls=BaseModel)
