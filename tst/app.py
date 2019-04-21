@@ -1,8 +1,8 @@
-from flask_orm import FlaskOrm
+from flask_orm import FlaskOrm, Model
 from sqlalchemy import Column, String
 from flask import Flask
 
-class User(FlaskOrm.Model):
+class User(Model):
     name = Column(String(255))
 
 app = Flask(__name__)

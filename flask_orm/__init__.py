@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar, Generic, Union
+from typing import Optional, TypeVar, Generic, Union, Type, ClassVar
 from flask import Flask, current_app, _app_ctx_stack, Response
 
 from sqlalchemy import create_engine
@@ -13,10 +13,10 @@ from .engine import get_engine_session, get_app_engine
 
 
 class FlaskOrm(object):
-    settings: Optional[ConfigSetup] = None
-    engine: Optional[Engine] = None
-    session: Optional[scoped_session] = None
-    Model: declarative_base = Model
+    settings: ClassVar[Optional[ConfigSetup]] = None
+    engine: ClassVar[Optional[Engine]] = None
+    session: ClassVar[Optional[scoped_session]] = None
+    Model: ClassVar[Type[Model]] = Model
 
     def __init__(self, app: Optional[Flask]=None) -> None:
         self.app = app
@@ -32,8 +32,8 @@ class FlaskOrm(object):
         app.before_first_request(self.setup_engine)
         app.before_request(self.setup_request)
 
-    def teardown(self, resp_or_exc: Union[Response, Exception]) -> None:
-        self.session.remove()
+    def teardown(self, exc: Optional[Exception]) -> None:
+        self.session.close()
 
     def setup_engine(self) -> None:
         self.engine = get_app_engine(app=self.app)
